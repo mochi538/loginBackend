@@ -2,17 +2,11 @@ const mongoose = require("mongoose");
 
 const conexionDB = async () => {
   try {
-    mongoose.conncet(DATABASE,
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        serverSelectionTimeoutMS: 10000,
-      }
-    );
-    console.log("Coneixión a la base de datos exitosa");
+    await mongoose.connect("mongodb+srv://mochi5384:AALTBTPX_X@cluster0.rkfo3qm.mongodb.net/loginUsers?retryWrites=true&w=majority&appName=Cluster0");
+    console.log("Conexión a la base de datos exitosa");
   } catch (e) {
-    console.log("Erroso al conectar la base de datos");
+    console.log("Error al conectar la base de datos", e);
   }
 };
 
-module.exports = conexionDB();
+module.exports = {conexionDB};

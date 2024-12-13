@@ -6,6 +6,7 @@ const schema = new mongoose.Schema({
         required: true,
         unique:true
     },
+
     
     password:{
         type:String,

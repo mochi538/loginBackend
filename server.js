@@ -1,18 +1,34 @@
 const express = require("express");
-/* const passport = require("passport"); */
+const passport = require("passport");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-/* const GoogleStrategy = require("passport-google-oauth20").Strategy; */
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const session = require("express-session");
+require("dotenv").config();  
+
 const authRoutes = require("./routes/usersRoute");
+const { conexionDB } = require("./config/db");
+
+conexionDB();
 
 const app = express();
-app.use(express.json());
 
+
+app.use(express.json());
 app.use(cors());
 app.use(bodyParser.json());
-app.use("/api/auth", authRoutes);
+app.use(
+  session({
+    secret: process.env.SECRET_KEY, 
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 
-/* passport.use(
+// Configuración de Passport
+passport.use(
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
@@ -25,15 +41,19 @@ app.use("/api/auth", authRoutes);
   )
 );
 
-passport.serializeUser((user, done) => dine(null, user));
-passport.deserializeUser((user, done) => dine(null, user));
+passport.serializeUser((user, done) => done(null, user));
+passport.deserializeUser((user, done) => done(null, user));
 
-app.use(passport.initialize());
-app.use(passport.session());
+// Rutas de autenticación
+app.use("/api/auth", authRoutes);
 
- */
-/* app.get(
-  "auth/callback",
+app.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+app.get(
+  "/auth/callback",
   passport.authenticate("google", { failureRedirect: "/" }),
   (req, res) => {
     res.redirect("/profile");
@@ -41,10 +61,14 @@ app.use(passport.session());
 );
 
 app.get("/profile", (req, res) => {
+  if (!req.user) {
+    return res.status(401).send("No autorizado");
+  }
   res.send(`Hola, ${req.user.displayName}`);
-}); */
+});
 
-const PORT = 3000;
+// Iniciar servidor
+const PORT = 3009;
 app.listen(PORT, () =>
-  console.log(`Servidor corriendo en http://localhost:${PORT}/api/auth`)
+  console.log(`Servidor corriendo en http://localhost:${PORT}`)
 );
